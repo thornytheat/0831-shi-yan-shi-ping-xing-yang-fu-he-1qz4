@@ -9,7 +9,7 @@ def test_input_row_conservation(dirty):
 
 def test_business_cases_conserve_input(dirty):
     report=run(dirty)
-    assert len(report['cases'])==4
+    assert len(report['cases'])==5
     assert sum(len(c['records']) for c in report['cases'])==report['balance']['accepted']
 
 

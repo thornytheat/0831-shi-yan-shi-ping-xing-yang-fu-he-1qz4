@@ -4,16 +4,17 @@ from app.business import DomainIssue
 from app.intake.numeric import quantity
 from app.spec import COLUMNS, KINDS
 
-HEADER = ('record', 'case', 'kind', *COLUMNS, 'note')
+HEADER = ('record', 'case', 'entrust', 'kind', *COLUMNS, 'note')
+_IDENTIFIER = r'[A-Za-z0-9][A-Za-z0-9_.-]{0,35}'
 
 
 def record(values):
     if len(values) != len(HEADER):
         raise DomainIssue('COLUMN_COUNT')
     row = dict(zip(HEADER, values))
-    for key in ('record', 'case'):
+    for key in ('record', 'case', 'entrust'):
         row[key] = row[key].strip()
-        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,35}', row[key]):
+        if not re.fullmatch(_IDENTIFIER, row[key]):
             raise DomainIssue('BAD_IDENTIFIER')
     if row['kind'] not in KINDS:
         raise DomainIssue('UNKNOWN_KIND')

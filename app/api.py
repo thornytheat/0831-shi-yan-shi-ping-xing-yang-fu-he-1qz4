@@ -1,6 +1,9 @@
+import json
+
 from flask import Blueprint, Response, current_app, jsonify, request
 
 from app.business import DomainIssue
+from app.delivery.service import deliver, withdraw
 from app.evidence.render import artifact
 from app.inputs import read_input
 from app.modules.pipeline import run
@@ -40,3 +43,19 @@ def export(run_id):
         'Content-Disposition':f'attachment; filename="review-{report["id"][:12]}.json"',
         'Cache-Control':'no-store',
     })
+
+
+@api.get('/runs/<run_id>/deliveries/<entrust>')
+def delivery(run_id, entrust):
+    store = current_app.extensions['runs']
+    packet = deliver(store, run_id, entrust)
+    body = (json.dumps(packet, ensure_ascii=False, sort_keys=True, indent=2)+'\n').encode()
+    return Response(body, mimetype='application/json', headers={
+        'Content-Disposition': f'attachment; filename="delivery-{entrust}-{run_id[:8]}.json"',
+        'Cache-Control': 'no-store',
+    })
+
+
+@api.post('/runs/<run_id>/deliveries/<entrust>/withdraw')
+def delivery_withdraw(run_id, entrust):
+    return jsonify(withdraw(current_app.extensions['runs'], run_id, entrust))

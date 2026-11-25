@@ -1,5 +1,5 @@
-import {request} from './client.js';
-import {snapshot, history} from './view.js';
+import {request, element} from './client.js';
+import {snapshot, history, badge} from './view.js';
 import {visualize} from './plots.js';
 
 const form = document.querySelector('#source');
@@ -11,6 +11,7 @@ const evidence = document.querySelector('#evidence');
 const stages = [...document.querySelectorAll('[data-stage]')];
 let stage = 'balance';
 let report, selected, batch, running = false;
+const revoked = new Set();
 
 function source() {
   const data = new FormData();
@@ -36,6 +37,39 @@ function draw() {
     detail.querySelector('[value="APPROVED"]').disabled = !report.balance.releasable || batch.status==='APPROVED';
     detail.querySelector('[value="HELD"]').disabled = batch.status==='APPROVED';
     evidence.href = `/api/runs/${batch.id}/evidence`;
+    renderDeliveries();
+  }
+}
+
+function renderDeliveries() {
+  const panel = document.querySelector('#delivery');
+  const list = document.querySelector('#entrust-list');
+  panel.hidden = !batch;
+  list.replaceChildren();
+  if (!batch) return;
+  const revokedKey = entrust => `${batch.id}:${entrust}`;
+  const doubtfulByEntrust = new Map();
+  for (const caseRow of report.cases || []) {
+    const count = Object.keys(caseRow.doubtful || {}).length;
+    if (count) doubtfulByEntrust.set(caseRow.entrust, (doubtfulByEntrust.get(caseRow.entrust) || 0) + count);
+  }
+  for (const entrust of report.balance.entrusts || []) {
+    const item = element('li');
+    const name = element('span', entrust, {class:'entrust-name'});
+    item.append(name);
+    if (doubtfulByEntrust.has(entrust)) item.append(badge('DOUBTFUL'));
+    const download = element('a', revoked.has(revokedKey(entrust)) ? '授权已撤回' : '下载交付件',
+      {href: `/api/runs/${batch.id}/deliveries/${encodeURIComponent(entrust)}`});
+    if (revoked.has(revokedKey(entrust))) {
+      download.removeAttribute('href');
+      download.classList.add('is-revoked');
+      download.setAttribute('aria-disabled', 'true');
+    }
+    const revoke = element('button', '撤回授权',
+      {type: 'button', class: 'revoke', 'data-entrust': entrust});
+    if (revoked.has(revokedKey(entrust))) revoke.disabled = true;
+    item.append(download, revoke);
+    list.append(item);
   }
 }
 
@@ -101,6 +135,17 @@ detail.addEventListener('submit',event=>{
     const payload={status:event.submitter.value,revision:batch.revision,note:detail.elements.note.value};
     const result=await request(`/api/runs/${batch.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     show(result,true); announce(result.status==='APPROVED'?'批次已签发':'批次已暂缓'); await refresh();
+  });
+});
+document.querySelector('#entrust-list').addEventListener('click',event=>{
+  const button = event.target.closest('[data-entrust]');
+  if (!button) return;
+  const entrust = button.dataset.entrust;
+  perform(async()=>{
+    await request(`/api/runs/${batch.id}/deliveries/${encodeURIComponent(entrust)}/withdraw`,{method:'POST'});
+    revoked.add(`${batch.id}:${entrust}`);
+    renderDeliveries();
+    announce(`委托 ${entrust} 的授权已撤回，后续下载将被拒绝`);
   });
 });
 preview(stage);

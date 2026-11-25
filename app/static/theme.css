@@ -69,3 +69,12 @@ body.lab {margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--fon
 .sample-rule{display:grid;grid-template-columns:3.5em 1fr 3em;gap:8px;padding:10px 0;border-bottom:1px dashed var(--line)}.sample-id,.sample-method{font-family:var(--font-num)}.sample-pass{color:var(--accent)}.sample-fail{color:var(--fault)}
 
 .chart-note{margin-top:9px;color:var(--muted);overflow-wrap:anywhere}
+
+.lab #delivery {margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.lab #delivery h3 {font-size:15px;margin:0 0 .6em}
+.lab #entrust-list {list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lab #entrust-list li {display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--soft)}
+.lab .entrust-name {font-family:var(--font-num);font-weight:700;min-width:56px}
+.lab #entrust-list a {margin-left:auto}
+.lab #entrust-list a.is-revoked {color:var(--fault);text-decoration:none;cursor:not-allowed}
+.lab .badge[data-result="DOUBTFUL"] {color:#9a6b00}

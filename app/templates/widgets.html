@@ -38,8 +38,12 @@
     <p id="run-status"></p><label for="note">复核意见</label>
     <textarea id="note" name="note" minlength="3" maxlength="200" required></textarea>
     <div class="review-actions"><button name="decision" value="HELD">暂缓</button><button class="action" name="decision" value="APPROVED">签发</button></div>
-    <a id="evidence">下载复核证据</a>
+    <a id="evidence">下载整批复核证据（内部）</a>
   </form>
+  <section id="delivery" hidden>
+    <h3>按委托交付</h3>
+    <ul id="entrust-list"></ul>
+  </section>
 </aside>
 {% endmacro %}
 {% macro status() %}

@@ -6,8 +6,8 @@ from app.spec import COLUMNS, KINDS
 from conftest import csv_data
 
 
-def line(record='0099', quantity='1', note='校核'):
-    return [record,'0001',KINDS[0],quantity,*(['0']*(len(COLUMNS)-1)),note]
+def line(record='0099', quantity='1', note='校核', entrust='WT-A'):
+    return [record,'0001',entrust,KINDS[0],quantity,*(['0']*(len(COLUMNS)-1)),note]
 
 
 def test_bom_preserves_identifier():  # TRAP-02 TRAP-08

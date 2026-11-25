@@ -24,7 +24,9 @@ def inspect(data):
             except DomainIssue as error:
                 key = values[0][:36] if values else ''
                 case = values[1][:36] if len(values) > 1 else ''
-                rejected.append(dict(line=line, record=key, case=case, reason=error.code))
+                entrust = values[2][:36] if len(values) > 2 else ''
+                rejected.append(dict(line=line, record=key, case=case,
+                                     entrust=entrust, reason=error.code))
     except Error as error:
         raise DomainIssue('CSV_MALFORMED') from error
     accepted, conflicts = partition(candidates)
